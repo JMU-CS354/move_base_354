@@ -1,0 +1,36 @@
+<launch>
+
+  <!-- Launch file command-line arguments -->
+  <arg name="planner" default="astar"/>
+  <arg name="map_file" default="$(find move_base_354)/maps/wall_world.yaml"/>
+  <arg name="3d_sensor" default="$(env TURTLEBOT_3D_SENSOR)"/>  <!-- r200, kinect, asus_xtion_pro -->
+  <arg name="initial_pose_x" default="0.0"/>
+  <arg name="initial_pose_y" default="0.0"/>
+  <arg name="initial_pose_a" default="0.0"/>
+
+  <!-- Start AMCL localization -->
+  <include file="$(find turtlebot_navigation)/launch/includes/amcl/$(arg 3d_sensor)_amcl.launch.xml">
+    <arg name="initial_pose_x" value="$(arg initial_pose_x)"/>
+    <arg name="initial_pose_y" value="$(arg initial_pose_y)"/>
+    <arg name="initial_pose_a" value="$(arg initial_pose_a)"/>
+  </include>
+    
+
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
+  <node name="costmap" pkg="move_base_354" type="costmap.py" output="screen"/>
+
+  <node name="local_planner" pkg="move_base_354" type="local_planner.py" output="screen"/>
+  <node name="move_base" pkg="move_base_354" type="move_base.py" output="screen"/>
+  
+  <node if="$(eval planner == 'astar')"
+	name="astar_planner" pkg="move_base_354" type="astar_planner.py" output="screen"/>
+
+  <node if="$(eval planner == 'rrt')"
+	name="rrt_planner" pkg="move_base_354" type="rrt_planner.py" output="screen"/>
+
+  <node if="$(eval planner == 'prm')"
+	name="prm_planner" pkg="move_base_354" type="prm_planner.py" output="screen"/>
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find move_base_354)/rviz/planning.rviz"/> 
+
+</launch>
