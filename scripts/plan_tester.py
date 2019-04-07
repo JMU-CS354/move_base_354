@@ -1,10 +1,10 @@
 """Testing code for global path planners.
 
 Author: Nathan Sprague
-Version: 2/18/2019
+Version: 3/14/2019
 
 """
-
+import copy
 import skimage.draw
 import rospy
 from nav_msgs.srv import GetPlan
@@ -13,6 +13,7 @@ import tf2_ros
 
 import util
 import map_utils
+
 
 
 class PlanTester(object):
@@ -46,17 +47,19 @@ class PlanTester(object):
         """
         self.costmap = map_utils.Map(costmap)
 
-    def plan_cost(self, path_msg):
+    def plan_cost(self, path_msg, start, goal):
         """Return the total cost of the provided plan. The cost is the total
         Euclidean distance between all waypoints, plus the cost of
         every cell in the costmap that is traversed.
 
         """
-        prev_pose = path_msg.poses[0]
+        poses = [start] + path_msg.poses + [goal]
+
+        prev_pose = poses[0]
         total_distance = 0
         cell_cost = 0
 
-        for cur_pose in path_msg.poses[1::]:
+        for cur_pose in poses[1::]:
             total_distance += util.distance(prev_pose, cur_pose)
             row1, col1 = self.costmap.cell_index(prev_pose.pose.position.x,
                                                  prev_pose.pose.position.y)
@@ -91,7 +94,7 @@ class PlanTester(object):
                 print("Error: empty plan.")
         else:
             self.path_pub.publish(path_msg.plan)
-            cost = self.plan_cost(path_msg.plan)
+            cost = self.plan_cost(path_msg.plan, start_pose, end_pose)
             if util.distance(path_msg.plan.poses[0], start_pose) > .01:
                 print("Path doesn't start at the start location!")
                 print path_msg.plan.poses[0], start_pose

@@ -14,14 +14,14 @@
   </include>
 
 
-  <!-- Start AMCL localization -->
+  <!-- Start planner localization -->
   <include file="$(find move_base_354)/launch/move_base.launch">
     <arg name="initial_pose_x" value="$(arg initial_pose_x)"/>
     <arg name="initial_pose_y" value="$(arg initial_pose_y)"/>
     <arg name="initial_pose_a" value="$(arg initial_pose_a)"/>
     <arg name="map_file" default="$(arg map_file)"/>
+    <arg name="planner" default="$(arg planner)"/>
     <arg name="3d_sensor" default="$(arg 3d_sensor)"/>  <!-- r200, kinect, asus_xtion_pro -->
-
   </include>
 
 </launch>
